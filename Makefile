@@ -5,9 +5,9 @@ PROG = OpenGLSkeleton
 
 SRCS = $(SRCMAIN)
 
-SRCMAIN =./src/main.cpp
+SRCMAIN =./src/main.cpp ./src/GraphicsHandler.cpp ./src/LoadTexture.cpp
 
-LIBS = -lGL -lglfw
+LIBS = -lGL -lglfw -lGLEW
 
 all: $(PROG)
 

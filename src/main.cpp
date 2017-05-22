@@ -75,8 +75,11 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT);
     
     graphics.useShader();
+    
+    // Updates
     rotation+=deltaTime*60;
     
+    // Draw
     graphics.drawObject(glm::vec2(GRID_RESX*0.5, GRID_RESY*0.5f), glm::vec2(100.0f, 100.0f), rotation);
 
     glfwSwapBuffers(window);

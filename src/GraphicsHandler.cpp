@@ -88,7 +88,7 @@ void GraphicsHandler::drawObject(glm::vec2 position, glm::vec2 size, GLfloat rot
     transformModel(glm::vec3(position.x-size.x*0.5f, grid.y-position.y-size.y*0.5f, 0.0f), 
                    size, 
                    rotate,
-                   colour);
+                   glm::vec3(1.0f-colour.x, 1.0f-colour.y, 1.0f-colour.z);
     
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);

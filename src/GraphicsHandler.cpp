@@ -4,29 +4,33 @@ GraphicsHandler::GraphicsHandler() {
 
 }
 
-void GraphicsHandler::useShader() {
-  glUseProgram(shaderProgram);
+void GraphicsHandler::useShader(std::string name) {
+  glUseProgram(shaders[name]);
+  crntShader = name;
 }
 
-GLuint GraphicsHandler::getShader() {
-  return shaderProgram;
+GLuint GraphicsHandler::getShader(std::string name) {
+  return shaders[name];
 }
 
-void GraphicsHandler::init(int width, int height) {
+void GraphicsHandler::loadTexture(std::string name, const char * filename){
+  textures[name] = txt::LoadTexture(filename);
+}
+
+void GraphicsHandler::init(int width, int height, std::string shader) {
   
   glEnable(GL_CULL_FACE);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   
-  loadShaders("./shaders/shader.vert", "./shaders/shader.frag");
   glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(width),
                                    static_cast<GLfloat>(height), 0.0f, -0.1f, 1.0f);
-
+  
   grid = glm::vec2(width, height);
   
-  glUseProgram(shaderProgram);
-  glUniform1i(glGetUniformLocation(shaderProgram, (const GLchar*)"image"), 0);
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, (const GLchar*)"projection"), 1, GL_FALSE, glm::value_ptr(projection));
+  useShader(shader);
+  glUniform1i(glGetUniformLocation(shaders[crntShader], (const GLchar*)"image"), 0);
+  glUniformMatrix4fv(glGetUniformLocation(shaders[crntShader], (const GLchar*)"projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
   
   GLuint VBO;
@@ -53,13 +57,9 @@ void GraphicsHandler::init(int width, int height) {
   glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4*sizeof(GLfloat), (GLvoid*)0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
-  
-  // Load textures probs
-    
-  texture = txt::LoadTexture("./Textures/image.png");
 }
 
-void GraphicsHandler::drawObject(glm::vec2 position, glm::vec2 size) {
+void GraphicsHandler::drawObject(glm::vec2 position, glm::vec2 size, std::string name) {
   
   transformModel(glm::vec3(position.x-size.x*0.5f, grid.y-position.y-size.y*0.5f, 0.0f), 
                  size, 
@@ -67,31 +67,31 @@ void GraphicsHandler::drawObject(glm::vec2 position, glm::vec2 size) {
                  glm::vec3(1.0f, 1.0f, 1.0f));
    
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, texture);
+  glBindTexture(GL_TEXTURE_2D, textures[name]);
   
   draw();
 }
 
-void GraphicsHandler::drawObject(glm::vec2 position, glm::vec2 size, GLfloat rotate) {
+void GraphicsHandler::drawObject(glm::vec2 position, glm::vec2 size, GLfloat rotate, std::string name) {
   
   transformModel(glm::vec3(position.x-size.x*0.5f, grid.y-position.y-size.y*0.5f, 0.0f), 
                  size, 
                  rotate,
                  glm::vec3(1.0f, 1.0f, 1.0f));
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, texture);
+  glBindTexture(GL_TEXTURE_2D, textures[name]);
   
   draw();
 }
 
-void GraphicsHandler::drawObject(glm::vec2 position, glm::vec2 size, GLfloat rotate, glm::vec3 colour) {
+void GraphicsHandler::drawObject(glm::vec2 position, glm::vec2 size, GLfloat rotate, glm::vec3 colour, std::string name) {
     transformModel(glm::vec3(position.x-size.x*0.5f, grid.y-position.y-size.y*0.5f, 0.0f), 
                    size, 
                    rotate,
-                   glm::vec3(1.0f-colour.x, 1.0f-colour.y, 1.0f-colour.z);
+                   glm::vec3(colour.x, colour.y, colour.z));
     
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, textures[name]);
     draw();
 }
 
@@ -114,11 +114,11 @@ void GraphicsHandler::transformModel(glm::vec3 position, glm::vec2 size, GLfloat
   
   model = glm::scale(model, glm::vec3(size, 1.0f));
   
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, (const GLchar*)"model"), 1, GL_FALSE, glm::value_ptr(model));
-  glUniform3f(glGetUniformLocation(shaderProgram, "fragColour"), colour.x, colour.y, colour.z);
+  glUniformMatrix4fv(glGetUniformLocation(shaders[crntShader], (const GLchar*)"model"), 1, GL_FALSE, glm::value_ptr(model));
+  glUniform3f(glGetUniformLocation(shaders[crntShader], "fragColour"), colour.x, colour.y, colour.z);
 }
 
-void GraphicsHandler::loadShaders(const char * vertex_file_path,const char * fragment_file_path){
+void GraphicsHandler::loadShaders(const char * vertex_file_path,const char * fragment_file_path, std::string name){
 
 	// Create the shaders
 	GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
@@ -209,5 +209,5 @@ void GraphicsHandler::loadShaders(const char * vertex_file_path,const char * fra
 	glDeleteShader(VertexShaderID);
 	glDeleteShader(FragmentShaderID);
 
-	shaderProgram = ProgramID;
+	shaders[name] = ProgramID;
 }

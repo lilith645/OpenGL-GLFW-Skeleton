@@ -58,7 +58,9 @@ int main() {
   glfwSetKeyCallback(window, key_callback);
   
   GraphicsHandler graphics;
-  graphics.init(GRID_RESX, GRID_RESY);
+  graphics.loadShaders("./shaders/shader.vert", "./shaders/shader.frag", "basic");
+  graphics.init(GRID_RESX, GRID_RESY, "basic");
+  graphics.loadTexture("ship", "./Textures/image.png");
   
   float rotation = 0.0f;
   GLfloat deltaTime = 0.0f;
@@ -74,13 +76,13 @@ int main() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     
-    graphics.useShader();
+    graphics.useShader("basic");
     
     // Updates
     rotation+=deltaTime*60;
     
     // Draw
-    graphics.drawObject(glm::vec2(GRID_RESX*0.5, GRID_RESY*0.5f), glm::vec2(100.0f, 100.0f), rotation);
+    graphics.drawObject(glm::vec2(GRID_RESX*0.5, GRID_RESY*0.5f), glm::vec2(100.0f, 100.0f), rotation, glm::vec3(1.0f, 0.5f, 0.5f), "ship");
 
     glfwSwapBuffers(window);
   } 
